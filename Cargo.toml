@@ -1,0 +1,15 @@
+[package]
+name = "rust-gpu-benchmark"
+version = "0.1.0"
+edition = "2021"
+description = "Port of GPU timing approaches (wrong / sync / best practice) using Candle + local CUDA"
+license = "MIT"
+
+[dependencies]
+# git main: better chance of Blackwell (sm_120) / RTX 50-series support than older crates.io
+candle-core = { git = "https://github.com/huggingface/candle.git", features = ["cuda"] }
+candle-nn = { git = "https://github.com/huggingface/candle.git", features = ["cuda"] }
+
+[profile.release]
+lto = true
+codegen-units = 1

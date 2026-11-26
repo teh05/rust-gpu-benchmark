@@ -1,0 +1,4 @@
+[toolchain]
+# Candle main calls `__cpuid_count` as a safe fn (Rust >= 1.94).
+channel = "1.94.0"
+components = ["rustfmt", "clippy"]

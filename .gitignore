@@ -1,1 +1,14 @@
 /target
+
+# Artikel / carousel outputs
+ARTIKEL.md
+ARTIKEL-carousel.pdf
+ARTIKEL-carousel.docx
+ARTIKEL-carousel-updated.docx
+ARTIKEL*.pdf
+ARTIKEL*.docx
+
+# Generator scripts
+scripts/make_carousel_pdf.py
+scripts/make_carousel_docx.py
+scripts/__pycache__/

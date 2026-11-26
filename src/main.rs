@@ -1,11 +1,3 @@
-//! GPU benchmark timing approaches (Candle + local CUDA).
-//!
-//! Port of `gpu_benchmark_approaches (1).py` / Colab notebook:
-//! 1. WRONG  — CPU timer without GPU sync (async trap / fake result)
-//! 2. CORRECT — CPU timer + `device.synchronize()`
-//! 3. BEST PRACTICE (Candle) — same as (2); Candle's official benches use synchronize.
-//!    True CUDA Events (`torch.cuda.Event`) are not exposed by Candle; use cudarc later if needed.
-
 use candle_core::{DType, Device, Module, Result, Tensor};
 use candle_nn::{linear, Linear, VarBuilder, VarMap};
 use std::time::Instant;
@@ -56,24 +48,20 @@ fn main() -> Result<()> {
     let model = Mlp::new(vb)?;
     let x = Tensor::randn(0f32, 1.0, (BATCH, HIDDEN), &device)?;
 
-    // Warmup: load CUDA kernels / caches (same idea as the Python notebook).
+    // Warmup: load CUDA kernels
     for _ in 0..WARMUP {
         let _ = model.forward(&x)?;
     }
     device.synchronize()?;
 
-    // ========================================
     // BENCHMARK 1: WRONG (Asynchronous Trap)
-    // ========================================
     let start = Instant::now();
     for _ in 0..ITERATIONS {
         let _ = model.forward(&x)?;
     }
     let time_wrong = start.elapsed();
 
-    // =========================================
     // BENCHMARK 2: CORRECT (CPU Sync + Timer)
-    // =========================================
     device.synchronize()?;
     let start = Instant::now();
     for _ in 0..ITERATIONS {
@@ -82,11 +70,8 @@ fn main() -> Result<()> {
     device.synchronize()?;
     let time_sync = start.elapsed();
 
-    // =========================================
     // BENCHMARK 3: BEST PRACTICE (Candle)
-    // Candle benches time with synchronize around Instant.
-    // Numbers should be close to benchmark 2.
-    // =========================================
+
     device.synchronize()?;
     let start = Instant::now();
     for _ in 0..ITERATIONS {
@@ -110,9 +95,7 @@ fn main() -> Result<()> {
         ms(time_best)
     );
     println!();
-    println!(
-        "Hint: if [WRONG] << [CORRECT], the async trap is visible on this GPU."
-    );
+    println!("Hint: if [WRONG] << [CORRECT], the async trap is visible on this GPU.");
 
     Ok(())
 }
